@@ -117,26 +117,27 @@ export default function routes(req, res, data) {
             }
           };
           res.end(JSON.stringify(response));
+          return;
         };
       });
 
-      fs.writeFile(`${file.name}.txt`, file?.content ?? '', 'utf-8', (err) => {
+      fs.appendFile(`${file.name}.txt`, `\n${file.content}`, 'utf-8', (err) => {
         if (err) {
           console.log(err);
           res.statusCode = 500;
 
           const response = {
             err: {
-              message: `Error writing file ${file.name}`
+              message: `Error updating the file ${file.name}`
             }
           };
           res.end(JSON.stringify(response));
           return;
         }
-        res.statusCode = 201;
+        res.statusCode = 200;
 
         const response = {
-          message: `File ${file.name} created with success`
+          message: `File ${file.name} updated with success`
         };
         res.end(JSON.stringify(response));
         return;
