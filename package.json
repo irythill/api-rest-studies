@@ -10,5 +10,9 @@
   },
   "author": "dxt",
   "license": "ISC",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "sequelize": "^6.37.5",
+    "sqlite3": "^5.1.7"
+  }
 }
