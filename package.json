@@ -1,0 +1,14 @@
+{
+  "name": "api-practice",
+  "version": "1.0.0",
+  "description": "API for practice nodejs",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./",
+    "start:dev": "nodemon ./"
+  },
+  "author": "dxt",
+  "license": "ISC",
+  "type": "module"
+}
