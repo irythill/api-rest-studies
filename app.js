@@ -1,7 +1,6 @@
 import http from 'http'
-import fs from 'fs'
 import sqlite3 from 'sqlite3'
-import { sequelize } from './models.js'
+import { sequelize, createProduct, readProducts, readProductById, updateProductById, deleteProductById } from './models.js'
 import routes from './routes.js'
 
 const db = new sqlite3.Database('./tic.db', (err) => {
@@ -12,26 +11,18 @@ const db = new sqlite3.Database('./tic.db', (err) => {
   console.log('BD on!')
 })
 
-fs.writeFile('./mensagem.txt', 'Olá, Henrique de novo arquivo ihu', 'utf-8', (err) => {
-  if (err) {
-    console.log(err)
-    return
-  }
-  console.log('Arquivo criado com sucesso')
-})
-
-fs.readFile('./mensagem.txt', 'utf-8', (err, text) => {
-  if (err) {
-    console.log(err)
-    return
-  }
-  console.log(`Message: ${text}`)
-  startServer(text)
-})
-
 async function startServer(message) {
   await sequelize.sync()
-  
+  await createProduct({ name: 'Açaí puro', price: 10.50 })
+  await createProduct({ name: 'Açaí c/ morango', price: 15.00 })
+  await readProducts()
+  await readProductById(1)
+  await readProductById(30)
+  await updateProductById(1, { price: 55 })
+  await readProductById(1)
+  await deleteProductById(1)
+  await readProductById(1)
+
   const server = http.createServer((req, res) => {
     routes(req, res, { message })
   })
