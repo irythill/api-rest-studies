@@ -1,13 +1,8 @@
 import http from 'http'
 import fs from 'fs'
 import sqlite3 from 'sqlite3'
-import sequelize from 'sequelize'
+import { sequelize } from './models.js'
 import routes from './routes.js'
-
-const sequelize = new Sequelize({
-  dialect: 'sqlite3',
-  storage: './tic.db'
-})
 
 const db = new sqlite3.Database('./tic.db', (err) => {
   if (err) {
@@ -34,7 +29,9 @@ fs.readFile('./mensagem.txt', 'utf-8', (err, text) => {
   startServer(text)
 })
 
-function startServer(message) {
+async function startServer(message) {
+  await sequelize.sync()
+  
   const server = http.createServer((req, res) => {
     routes(req, res, { message })
   })
