@@ -5,8 +5,6 @@ const sequelize = new Sequelize({
   storage: './tic.db'
 })
 
-sequelize.authenticate()
-
 const Product = sequelize.define('product', {
   id: {
     type: Sequelize.INTEGER,
@@ -23,6 +21,8 @@ const Product = sequelize.define('product', {
     allowNull: false
   }
 })
+
+sequelize.authenticate()
 
 async function createProduct(product) {
   try {
@@ -60,8 +60,18 @@ async function readProductById(id) {
 
 async function updateProductById(id, productData) {
   try {
-    const result = await Product.update(productData, { where: { id:id } })
-    console.log(`Product updated with success!`, result)
+    const result = await Product.findByPk(id)
+
+    if (result?.id) {
+      for (const key in productData) {
+        if (key in result) {
+          result[key] = productData[key]
+        }
+      }
+      result.save()
+      console.log(`Product updated with success!`, result)
+    }
+
     return result
   } catch (err) {
     console.log('Fail to update the product', err)
@@ -75,6 +85,85 @@ async function deleteProductById(id) {
     console.log(`Product deleted with success!`, result)
   } catch (err) {
     console.log('Fail to delete the product', err)
+    throw err
+  }
+}
+
+const Order = sequelize.define('order', {
+  id: {
+    type: Sequelize.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  total_price: {
+    type: Sequelize.DOUBLE,
+    allowNull: false
+  },
+  state: {
+    type: Sequelize.STRING,
+    allowNull: false
+  }
+})
+
+const ProductOrder = sequelize.define('productOrder', {
+  id: {
+    type: Sequelize.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  quantity: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  },
+  price: {
+    type: Sequelize.DOUBLE,
+    allowNull: false
+  }
+})
+
+Product.belongsToMany(Order, { through: ProductOrder })
+Order.belongsToMany(Product, { through: ProductOrder })
+
+export async function createOrder(newOrder) {
+  try {
+    const order = await Order.create({
+      total_price: newOrder.totalPrice,
+      state: 'SENT'
+    });
+
+    for (const prod of newOrder.products) {
+      const product = await Product.findByPk(prod.id);
+      if (product) {
+        await order.addProduct(product, { through: { quantity: prod.quantity, price: prod.price } });
+      }
+    }
+    console.log('Order created with success');
+    return order;
+
+  } catch (err) {
+    console.log('Failed to create order', err);
+    throw err;
+  }
+}
+
+export async function readOrders() {
+  try {
+    const result = await ProductOrder.findAll()
+    console.log('Orders found with success', result)
+    return result
+  } catch {
+    console.log('Failed to read orders', err)
+    throw err
+  }
+}
+
+export async function readOrdersById(id) {
+  try {
+    const result = await Order.findByPk(id)
+    console.log('Order found with success', result)
+    return result
+  } catch {
+    console.log('Failed to read order', err)
     throw err
   }
 }

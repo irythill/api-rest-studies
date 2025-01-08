@@ -90,7 +90,7 @@ export default async function routes(req, res, data) {
   // PATCH
   if(req.method === 'PATCH' && req.url.split('/')[1] === 'products' && !isNaN(req.url.split('/')[2])){
     const body = []
-    
+
     req.on('data', (part) => {
       body.push(part)
     })
@@ -114,6 +114,11 @@ export default async function routes(req, res, data) {
       try {
         const response = await updateProductById(id, product)
         res.statusCode = 200
+
+        if (!response) {
+          res.statusCode = 404;
+        }
+
         res.end(JSON.stringify(response))
         return
 
@@ -153,6 +158,11 @@ export default async function routes(req, res, data) {
     try {
       const response = await deleteProductById(id)
       res.statusCode = 204
+
+      if (!response) {
+        res.statusCode = 404
+      }
+
       res.end()
       return
 
@@ -200,6 +210,10 @@ export default async function routes(req, res, data) {
 
     try {
       const response = await readProductById(id)
+      if (!response) {
+        res.statusCode = 404
+      }
+
       res.statusCode = 200
       res.end(JSON.stringify(response))
       return

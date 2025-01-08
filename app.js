@@ -1,6 +1,6 @@
 import http from 'http'
 import sqlite3 from 'sqlite3'
-import { createProduct, readProductById, sequelize } from './models.js'
+import { sequelize, createOrder, readOrders } from './models.js'
 import routes from './routes.js'
 
 const db = new sqlite3.Database('./tic.db', (err) => {
@@ -14,6 +14,9 @@ const db = new sqlite3.Database('./tic.db', (err) => {
 async function startServer(message) {
   await sequelize.sync()
 
+  await createOrder({ totalPrice: 13.00, products: [ { id: 1, quantity: 1, price: 5 } ] })
+  await readOrders()
+
   const server = http.createServer((req, res) => {
     routes(req, res, { message })
   })
@@ -26,4 +29,4 @@ async function startServer(message) {
 }
 
 startServer()
-
+ 
