@@ -1,32 +1,35 @@
-import http from 'http'
+import express from 'express'
+import bodyParser from 'body-parser'
 import sqlite3 from 'sqlite3'
-import { sequelize, createOrder, readOrders } from './models.js'
-import routes from './routes.js'
+import { sequelize } from './models.js'
+import { productRoutes  } from './routes/products.js'
 
-const db = new sqlite3.Database('./tic.db', (err) => {
-  if (err) {
-    console.log('Error initializing your database', err)
-    return
-  }
-  console.log('BD on!')
+const app = express()
+
+// middlewares
+app.use(bodyParser.json()) // lida com os formatos do body das requisições
+
+app.use(productRoutes)
+
+app.use((req, res, next) =>  {
+  console.log('Atendendo outras ligações na linha, aguarde...')
+  res.send({ mensagem: 'Bom dia! Qual o seu nome? Pronto para girar a roleta?' })
 })
 
-async function startServer(message) {
-  await sequelize.sync()
-
-  await createOrder({ totalPrice: 13.00, products: [ { id: 1, quantity: 1, price: 5 } ] })
-  await readOrders()
-
-  const server = http.createServer((req, res) => {
-    routes(req, res, { message })
+async function startApp() {
+  const db = new sqlite3.Database('./tic.db', (err) => {
+    if (err) {
+      console.log('Error initializing your database', err)
+      return
+    }
+    console.log('BD on!')
   })
+
+  await sequelize.sync()
   
   const port = 3000
   const host = 'localhost'
-  server.listen(port, host, () => {
-    console.log(`Server running at port ${port}, host ${host}`)
-  })
+  app.listen(port)
 }
 
-startServer()
- 
+startApp()
